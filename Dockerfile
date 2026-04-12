@@ -1,19 +1,15 @@
-FROM python:3.11-slim 
-# Version pequeña de python
+FROM python:3.11-slim
+# Imagen base ligera (Python 3.11).
 
 WORKDIR /code
-#Directorio de trabajo
 
+# Copia el código del contexto de build (directorio donde está el Dockerfile).
 COPY . .
-#Coge todo dentro del directorio de DockerFIle y lo mete dentro del 
-#contenedor en el directorio de trabajo code estipulado en la linea 3
 
 RUN pip install --no-cache-dir -r requirements.txt
-#Instalacion de dependencias de requirements.txt sin reduccion del tamaño de la imagen
-#Primero se ejecuta COPY . . y luego RUN pip install para que exista el archivo
-#requirements.txt en el contenedor antes de ejecutar el comando CMD
 
+# Puerto de la aplicación (debe coincidir con el target group del ALB :8000 y con docker-compose).
+EXPOSE 8000
+
+# Escucha en todas las interfaces para que el ALB y docker-compose puedan enrutar al contenedor.
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
-#Define el comando que se ejecuta cuando arranca un contenedor
-#Contenedor arranca la API con uvicorn en el puerto 8000 en el host 0.0.0.0,
-#Que posteriormente el compose mapea al puerto 5001 del host
