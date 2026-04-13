@@ -7,21 +7,23 @@ import json
 import pika
 # Cliente de RabbitMQ en Python; permite conectarse al broker, declarar colas y publicar/consumir mensajes.
 
+from api.get_parameter import get_rabbitmq_ip 
+#
+
 QUEUE_NAME = os.getenv("RABBITMQ_QUEUE", "dish_tasks")
 # Nombre de la cola donde se publican las tareas de platos. Si no hay env, se usa "dish_tasks". El worker debe consumir de la misma cola.
 
 def get_connection_params():
-    host = os.getenv("RABBITMQ_HOST", "localhost")
-    # Host del broker: en Docker es "rabbitmq" (nombre del servicio), en local "localhost".
+    # En AWS obtiene la IP de RabbitMQ desde Parameter Store
+    # En local si falla SSM, usa la variable de entorno o localhost
+    host = get_rabbitmq_ip()
+    if host == "localhost":
+        host = os.getenv("RABBITMQ_HOST", "localhost")
     port = int(os.getenv("RABBITMQ_PORT", "5672"))
-    # Puerto AMQP por defecto de RabbitMQ.
-    user = os.getenv("RABBITMQ_USER", "user")
-    password = os.getenv("RABBITMQ_PASSWORD", "password")
-    # Credenciales definidas en docker-compose (user/password).
+    user = os.getenv("RABBITMQ_USER", "admin")
+    password = os.getenv("RABBITMQ_PASSWORD", "password123")
     credentials = pika.PlainCredentials(user, password)
-    # Objeto que pika usa para autenticarse con el broker.
     return pika.ConnectionParameters(host=host, port=port, credentials=credentials)
-    # Parámetros de conexión (sin conectar aún); quien llame los usa para abrir la conexión.
 
 def publish_dish_task(task_id: str, dish_payload: dict):
     params = get_connection_params()

@@ -4,9 +4,16 @@ import pika
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
+from api.get_parameter import get_mongodb_ip, get_rabbitmq_ip 
 
-# conecta a mongo
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:admin123@localhost:27017/")
+#Conexión a mongo con el ps
+def get_mongo_uri() -> str:
+    mongo_ip = get_mongodb_ip()
+    if mongo_ip == "localhost":
+        return os.getenv("MONGO_URI", "mongodb://admin:admin123@localhost:27017/")
+    return f"mongodb://admin:password123@{mongo_ip}:27017/?authSource=admin"
+
+MONGO_URI = get_mongo_uri()
 client = MongoClient(MONGO_URI)
 db = client.tarea1_db
 dishes_collection = db["dishes"]
@@ -66,7 +73,9 @@ def process_message(ch, method, properties, body):
 
 def main():
     # Conexión a RabbitMQ
-    host = os.getenv("RABBITMQ_HOST", "localhost")
+    host = get_rabbitmq_ip()
+    if host == "localhost":
+        host = os.getenv("RABBITMQ_HOST", "localhost")
     port = int(os.getenv("RABBITMQ_PORT", "5672"))
     user = os.getenv("RABBITMQ_USER", "user")
     password = os.getenv("RABBITMQ_PASSWORD", "password")
