@@ -8,6 +8,7 @@ from api.get_parameter import get_mongodb_ip, get_rabbitmq_ip
 
 #Conexión a mongo con el ps
 def get_mongo_uri() -> str:
+    # Obtiene la IP de MongoDB desde Parameter Store, si SSM no está disponible, usa variable default
     mongo_ip = get_mongodb_ip()
     if mongo_ip == "localhost":
         return os.getenv("MONGO_URI", "mongodb://admin:admin123@localhost:27017/")

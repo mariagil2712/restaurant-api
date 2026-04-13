@@ -8,7 +8,7 @@ import pika
 # Cliente de RabbitMQ en Python; permite conectarse al broker, declarar colas y publicar/consumir mensajes.
 
 from api.get_parameter import get_rabbitmq_ip 
-#
+#Permite leer la IP de RabbitMQ desde AWS Parameter Store en vez de tenerla hardcodeada o depender solo de variables de entorno.
 
 QUEUE_NAME = os.getenv("RABBITMQ_QUEUE", "dish_tasks")
 # Nombre de la cola donde se publican las tareas de platos. Si no hay env, se usa "dish_tasks". El worker debe consumir de la misma cola.

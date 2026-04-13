@@ -5,3 +5,4 @@ uvicorn[standard]==0.40.0
 pika==1.3.2
 ruff==0.9.9 #Static Code Check
 awsiotsdk==1.28.1
+boto3 #parameter store
