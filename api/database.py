@@ -3,8 +3,12 @@ from pymongo import MongoClient
 from api.get_parameter import get_mongodb_ip
 
 def get_mongo_uri() -> str:
-    # Obtiene la IP de MongoDB desde Parameter Store (AWS)
-    # En local si falla SSM, usa la variable de entorno o el default
+    # Prioriza MONGO_URI si llega por entorno (por ejemplo desde user_data + docker run).
+    env_mongo_uri = os.getenv("MONGO_URI")
+    if env_mongo_uri:
+        return env_mongo_uri
+
+    # Si no existe variable de entorno, intenta resolver vía SSM y luego fallback local.
     mongo_ip = get_mongodb_ip()
     if mongo_ip == "localhost":
         return os.getenv("MONGO_URI", "mongodb://admin:admin123@localhost:27017/")
