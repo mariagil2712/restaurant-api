@@ -1,64 +1,64 @@
-services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq_server
-    ports:
+services: # Define los servicios/contendores del stack local (fuente: Compose Specification)
+  rabbitmq: # Servicio del broker de mensajeria AMQP (fuente: arquitectura del proyecto)
+    image: rabbitmq:3-management # Imagen oficial con plugin de management habilitado (fuente: Docker Hub RabbitMQ)
+    container_name: rabbitmq_server # Nombre fijo del contenedor para administracion local (fuente: Compose container_name)
+    ports: # Mapeo de puertos host:contenedor para exponer el servicio (fuente: Compose ports)
       - "5672:5672"   # RabbitMQ (AMQP)
       - "15672:15672" # Management UI
-    environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    environment: # Variables de entorno soportadas por la imagen RabbitMQ (fuente: Docker Hub RabbitMQ env vars)
+      RABBITMQ_DEFAULT_USER: user # Usuario inicial creado al primer arranque (fuente: RabbitMQ default user env)
+      RABBITMQ_DEFAULT_PASS: password # Password inicial del usuario por defecto (fuente: RabbitMQ default pass env)
+    healthcheck: # Configura chequeo de salud del contenedor (fuente: Compose healthcheck)
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"] # Verifica que el nodo RabbitMQ responda ping interno (fuente: rabbitmq-diagnostics)
+      interval: 10s # Ejecuta el chequeo cada 10 segundos (fuente: Compose healthcheck interval)
+      timeout: 5s # Tiempo maximo de espera por chequeo (fuente: Compose healthcheck timeout)
+      retries: 5 # Marca unhealthy tras 5 fallos consecutivos (fuente: Compose healthcheck retries)
 
-  mongodb:
-    image: mongo:latest
-    container_name: mongoCloud
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin123
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  mongodb: # Servicio de base de datos documental MongoDB (fuente: arquitectura del proyecto)
+    image: mongo:latest # Imagen oficial de MongoDB (fuente: Docker Hub Mongo)
+    container_name: mongoCloud # Nombre explicito del contenedor de Mongo (fuente: convencion local del repo)
+    ports: # Exposicion de puerto para conexiones locales/externas (fuente: Compose ports)
+      - "27017:27017" # Puerto por defecto de MongoDB (fuente: MongoDB networking docs)
+    environment: # Variables de inicializacion soportadas por imagen oficial (fuente: Docker Hub Mongo env vars)
+      MONGO_INITDB_ROOT_USERNAME: admin # Usuario root inicial de MongoDB (fuente: MONGO_INITDB_ROOT_USERNAME)
+      MONGO_INITDB_ROOT_PASSWORD: admin123 # Password root inicial para autenticacion (fuente: MONGO_INITDB_ROOT_PASSWORD)
+    healthcheck: # Chequeo para confirmar disponibilidad de MongoDB (fuente: Compose healthcheck)
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"] # Ejecuta ping administrativo en Mongo (fuente: MongoDB adminCommand)
+      interval: 10s # Frecuencia del healthcheck (fuente: Compose healthcheck interval)
+      timeout: 5s # Limite de tiempo por intento (fuente: Compose healthcheck timeout)
+      retries: 5 # Numero de reintentos antes de unhealthy (fuente: Compose healthcheck retries)
 
-  web-app:
-    build: .
-    ports:
-      - "5001:8000"
-    volumes:
-      - .:/code
-    environment:
-      MONGO_URI: "mongodb://admin:admin123@mongodb:27017/"
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USER: user
-      RABBITMQ_PASSWORD: password
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+  web-app: # Servicio de la API web principal (fuente: estructura del proyecto)
+    build: . # Construye imagen usando Dockerfile del directorio actual (fuente: Compose build context)
+    ports: # Publica puerto de la API al host local (fuente: Compose ports)
+      - "5001:8000" # Host 5001 redirige al puerto interno 8000 de la app (fuente: configuracion uvicorn/FastAPI)
+    volumes: # Montaje bind para desarrollo en caliente (fuente: Compose volumes)
+      - .:/code # Sincroniza codigo local dentro del contenedor (fuente: bind mount Docker)
+    environment: # Variables de conexion a dependencias de infraestructura (fuente: configuracion de la app)
+      MONGO_URI: "mongodb://admin:admin123@mongodb:27017/" # URI de Mongo usando nombre de servicio como host DNS interno (fuente: Docker Compose networking)
+      RABBITMQ_HOST: rabbitmq # Host de RabbitMQ en red interna de Compose (fuente: service discovery Compose)
+      RABBITMQ_PORT: 5672 # Puerto AMQP usado por cliente de mensajeria (fuente: RabbitMQ defaults)
+      RABBITMQ_USER: user # Usuario para autenticacion en RabbitMQ (fuente: variables del proyecto)
+      RABBITMQ_PASSWORD: password # Password del usuario RabbitMQ configurado (fuente: variables del proyecto)
+    depends_on: # Declara orden de arranque condicionado por salud (fuente: Compose depends_on conditions)
+      mongodb: # Dependencia explicita de base de datos MongoDB (fuente: requerimientos de runtime)
+        condition: service_healthy # Espera a que Mongo este healthy antes de iniciar API (fuente: Compose service_healthy)
+      rabbitmq: # Dependencia explicita de broker RabbitMQ (fuente: requerimientos de runtime)
+        condition: service_healthy # Espera a que RabbitMQ este healthy antes de iniciar API (fuente: Compose service_healthy)
 
-  worker:
-    build: .
-    volumes:
-      - .:/code          
-    environment:
-      MONGO_URI: "mongodb://admin:admin123@mongodb:27017/"
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USER: user
-      RABBITMQ_PASSWORD: password
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-    command: python api/worker.py   
+  worker: # Servicio de procesamiento asincrono de tareas (fuente: arquitectura worker-queue)
+    build: . # Reutiliza misma imagen base de la aplicacion (fuente: Dockerfile del proyecto)
+    volumes: # Monta codigo local dentro del contenedor worker (fuente: Compose volumes)
+      - .:/code # Permite ejecutar codigo actualizado sin reconstruir (fuente: bind mounts Docker)
+    environment: # Variables necesarias para conectarse a MongoDB y RabbitMQ (fuente: configuracion de worker.py)
+      MONGO_URI: "mongodb://admin:admin123@mongodb:27017/" # Cadena de conexion a Mongo en red interna Compose (fuente: DNS por nombre de servicio)
+      RABBITMQ_HOST: rabbitmq # Nombre DNS interno del contenedor RabbitMQ (fuente: Compose networking)
+      RABBITMQ_PORT: 5672 # Puerto AMQP del broker (fuente: RabbitMQ port defaults)
+      RABBITMQ_USER: user # Credencial de usuario del broker (fuente: variables del proyecto)
+      RABBITMQ_PASSWORD: password # Credencial de password del broker (fuente: variables del proyecto)
+    depends_on: # Espera servicios base antes de lanzar worker (fuente: Compose depends_on)
+      rabbitmq: # Dependencia de broker de mensajeria (fuente: arquitectura de colas)
+        condition: service_healthy # Inicia solo cuando RabbitMQ reporta estado healthy (fuente: Compose service_healthy)
+      mongodb: # Dependencia de persistencia documental (fuente: arquitectura de datos)
+        condition: service_healthy # Inicia solo cuando MongoDB reporta estado healthy (fuente: Compose service_healthy)
+    command: python api/worker.py # Comando de arranque del proceso worker dentro del contenedor (fuente: estructura del proyecto)
