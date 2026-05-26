@@ -1,4 +1,5 @@
-#!/bin/bash # Usa Bash para el aprovisionamiento inicial (fuente: GNU Bash manual)
+#!/bin/bash
+# Usa Bash para el aprovisionamiento inicial (fuente: GNU Bash manual)
 # Amazon Linux 2023 - Instalar Docker y RabbitMQ via Docker Compose
 
 # 1. Update system and install Docker

@@ -1,4 +1,5 @@
-#!/bin/bash # Usa Bash para ejecutar el user_data (fuente: GNU Bash manual)
+#!/bin/bash
+# Usa Bash para ejecutar el user_data (fuente: GNU Bash manual)
 # Amazon Linux 2023 - Instalar MongoDB 7.0 + Configuración de Admin
 
 # 1. Agregar el repositorio oficial de MongoDB para Amazon Linux (CentOS/RHEL)

@@ -1,4 +1,5 @@
-#!/bin/bash # Usa Bash para ejecutar user_data de EC2 (fuente: GNU Bash manual)
+#!/bin/bash
+# Usa Bash para ejecutar user_data de EC2 (fuente: GNU Bash manual)
 # Actualizar sistema e instalar Apache
 yum update -y # Actualiza paquetes base del sistema (fuente: YUM docs para Amazon Linux)
 yum install -y httpd # Instala Apache HTTP Server (fuente: paquetes oficiales Amazon Linux)

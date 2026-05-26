@@ -1,4 +1,5 @@
-#!/bin/bash # Usa Bash para ejecutar script de arranque (fuente: GNU Bash manual)
+#!/bin/bash
+# Usa Bash para ejecutar script de arranque (fuente: GNU Bash manual)
 # Amazon Linux 2023 - Instalar dependencias y arrancar el Worker
 
 set -euo pipefail # Falla rápido ante errores, variables vacías y pipes rotos (fuente: buenas prácticas Bash)

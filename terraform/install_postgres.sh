@@ -1,4 +1,5 @@
-#!/bin/bash # Usa Bash como intérprete de comandos (fuente: GNU Bash manual)
+#!/bin/bash
+# Usa Bash como intérprete de comandos (fuente: GNU Bash manual)
 # Amazon Linux 2023 - Instalar PostgreSQL 15
 sudo dnf update -y # Actualiza repos y paquetes del sistema (fuente: DNF docs)
 sudo dnf install -y postgresql15-server # Instala PostgreSQL 15 server package (fuente: Amazon Linux package repos)

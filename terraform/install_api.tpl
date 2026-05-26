@@ -1,4 +1,5 @@
-#!/bin/bash # Usa Bash para user_data renderizado por Terraform (fuente: GNU Bash manual)
+#!/bin/bash
+# Usa Bash para user_data renderizado por Terraform (fuente: GNU Bash manual)
 # User data — API (Amazon Linux 2023), ALB target :8000
 # IPs de RabbitMQ y Mongo inyectadas por Terraform (templatefile); no hace falta IAM ni SSM en la instancia.
 # Credenciales: install_rabbitmq.sh (admin/password123) e install_mongodb.sh (admin/password123).

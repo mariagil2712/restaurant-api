@@ -1,4 +1,5 @@
-#!/bin/bash # Usa Bash para user_data de API (fuente: GNU Bash manual)
+#!/bin/bash
+# Usa Bash para user_data de API (fuente: GNU Bash manual)
 # =============================================================================
 # NOTA: el user_data de las instancias API lo genera Terraform con install_api.tpl
 # (templatefile en main.tf), inyectando IPs privadas de RabbitMQ y MongoDB.
