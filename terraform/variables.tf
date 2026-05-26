@@ -24,7 +24,7 @@ variable "instance_type" {              # Define familia/tamaño de instancia EC
 variable "key_name" {                          # Variable para key pair usado en acceso SSH (fuente: AWS EC2 key pairs)
   type        = string                         # Tipo string para nombre lógico del key pair (fuente: Terraform types)
   description = "Nombre del par de llaves EC2" # Documenta entrada requerida (fuente: convención Terraform)
-  default     = "restaurant-api"             # Key pair por defecto del entorno actual (fuente: configuración del proyecto)
+  default     = "project1cc"             # Key pair por defecto del entorno actual (fuente: configuración del proyecto)
 }
 
 # Tres subnets en zonas distintas (el ALB usa al menos dos; ver main.tf slice).
