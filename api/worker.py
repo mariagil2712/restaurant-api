@@ -4,7 +4,7 @@ import pika
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
-from api.get_parameter import get_mongodb_ip, get_rabbitmq_ip 
+from api.get_parameter import get_mongodb_ip, get_rabbitmq_ip
 
 #Conexión a mongo con el ps
 def get_mongo_uri() -> str:

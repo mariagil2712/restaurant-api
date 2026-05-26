@@ -61,4 +61,4 @@ services: # Define los servicios/contendores del stack local (fuente: Compose Sp
         condition: service_healthy # Inicia solo cuando RabbitMQ reporta estado healthy (fuente: Compose service_healthy)
       mongodb: # Dependencia de persistencia documental (fuente: arquitectura de datos)
         condition: service_healthy # Inicia solo cuando MongoDB reporta estado healthy (fuente: Compose service_healthy)
-    command: python api/worker.py # Comando de arranque del proceso worker dentro del contenedor (fuente: estructura del proyecto)
+    command: python -m api.worker # Comando de arranque del proceso worker dentro del contenedor (fuente: estructura del proyecto)

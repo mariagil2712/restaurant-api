@@ -5,7 +5,7 @@
 # Este .sh se mantiene como referencia del mismo arranque sin plantilla (p. ej. pruebas locales).
 # =============================================================================
 set -euo pipefail # Activa modo estricto para evitar fallos silenciosos (fuente: buenas prácticas Bash)
-exec > >(tee /var/log/user-data-install-api.log | logger -t user-data -s 2>/dev/console) 2>&1 # Envía logs a archivo, syslog y consola EC2 (fuente: AWS user-data debug guide)
+#exec > >(tee /var/log/user-data-install-api.log | logger -t user-data -s 2>/dev/console) 2>&1 # Envía logs a archivo, syslog y consola EC2 (fuente: AWS user-data debug guide)
 
 sudo dnf update -y # Actualiza paquetes del sistema base (fuente: DNF docs)
 sudo dnf install -y docker git # Instala Docker para contenedor y Git para clonar repo (fuente: requerimientos de despliegue)
@@ -16,8 +16,6 @@ sudo chmod +x /usr/local/bin/docker-compose # Marca binario como ejecutable (fue
 sudo systemctl enable docker # Habilita Docker en cada reinicio (fuente: systemctl enable)
 sudo systemctl start docker # Inicia daemon Docker inmediatamente (fuente: systemctl start)
 sudo usermod -aG docker ec2-user || true # Agrega ec2-user al grupo docker y evita fallo si ya está (fuente: Docker post-install + control de errores Bash)
-
-sleep 60 # Espera a que servicios dependientes terminen de arrancar (fuente: orden de despliegue entre instancias)
 
 # Sustituir manualmente si ejecutas este script fuera de Terraform:
 GIT_REPO_URL="${GIT_REPO_URL:-https://github.com/mariagil2712/restaurant-api.git}" # Usa variable externa o URL por defecto del repo (fuente: expansión de parámetros Bash)
