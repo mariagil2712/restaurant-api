@@ -23,12 +23,25 @@ def get_connection_params():
     user = os.getenv("RABBITMQ_USER", "admin")
     password = os.getenv("RABBITMQ_PASSWORD", "password123")
     credentials = pika.PlainCredentials(user, password)
-    return pika.ConnectionParameters(host=host, port=port, credentials=credentials)
+    return pika.ConnectionParameters(
+        host=host,
+        port=port,
+        credentials=credentials,
+        connection_attempts=3,
+        retry_delay=2,
+        socket_timeout=10,
+        blocked_connection_timeout=10,
+    )
 
 def publish_dish_task(task_id: str, dish_payload: dict):
     params = get_connection_params()
-    # Obtiene host, puerto y credenciales desde variables de entorno.
-    connection = pika.BlockingConnection(params)
+    try:
+        connection = pika.BlockingConnection(params)
+    except Exception as exc:
+        raise RuntimeError(
+            f"No se pudo conectar a RabbitMQ en {params.host}:{params.port}. "
+            "Comprueba que rabbitmq_server esté activo y RABBITMQ_HOST sea la IP privada."
+        ) from exc
     # Abre la conexión TCP con RabbitMQ (bloqueante hasta que se establece).
     channel = connection.channel()
     # Crea un canal sobre la conexión; por el canal se declaran colas y se publican mensajes.

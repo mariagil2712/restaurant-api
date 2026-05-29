@@ -27,6 +27,12 @@ cd restaurant-api # Entra al directorio de la aplicación para construir imagen 
 sudo docker build -t restaurant-api:latest . # Construye imagen de la API desde Dockerfile del proyecto (fuente: Docker build docs)
 
 sudo docker rm -f restaurant-api 2>/dev/null || true # Elimina contenedor previo si existe para evitar conflicto de nombre (fuente: Docker rm)
-sudo docker run -d --name restaurant-api --restart unless-stopped -p 8000:8000 -e "RABBITMQ_HOST=${rabbit_private_ip}" -e "RABBITMQ_PORT=5672" -e "RABBITMQ_USER=admin" -e "RABBITMQ_PASSWORD=password123" -e "MONGO_URI=mongodb://admin:password123@${mongo_private_ip}:27017/?authSource=admin" restaurant-api:latest # Ejecuta API exponiendo :8000 e inyectando IPs privadas y credenciales actuales (fuente: Docker run + variables Terraform)
+sudo docker run -d --name restaurant-api --restart unless-stopped -p 8000:8000 \
+  -e "RABBITMQ_HOST=${rabbit_private_ip}" \
+  -e "RABBITMQ_PORT=5672" \
+  -e "RABBITMQ_USER=admin" \
+  -e "RABBITMQ_PASSWORD=password123" \
+  -e "MONGO_URI=${mongo_uri}" \
+  restaurant-api:latest
 
-echo "[install_api] API en :8000; Rabbit=${rabbit_private_ip} Mongo=${mongo_private_ip}" # Log de verificación con endpoints usados por la API (fuente: observabilidad operativa)
+echo "[install_api] API en :8000; Rabbit=${rabbit_private_ip} MONGO_URI=${mongo_uri}"

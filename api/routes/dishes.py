@@ -33,9 +33,18 @@ def create_dish(body: DishCreate):
         "updatedAt": int(datetime.timestamp(datetime.now())),
     }
     tasks_collection = get_tasks_collection()
-    tasks_collection.insert_one(task)
-    publish_dish_task(taskId, payload)
-    return{"taskId": taskId, "status": "running"}
+    try:
+        tasks_collection.insert_one(task)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Error al guardar la tarea en MongoDB: {exc}",
+        ) from exc
+    try:
+        publish_dish_task(taskId, payload)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {"taskId": taskId, "status": "running"}
 
 @dish.get("/{dish_id}")
 def get_dish(dish_id: str):
@@ -84,8 +93,17 @@ def delete_dish(dish_id: str):
         "updatedAt": int(datetime.timestamp(datetime.now())),
     }
     tasks_collection = get_tasks_collection()
-    tasks_collection.insert_one(task)
-    publish_dish_task(taskId, {"action": "delete", "dish_id": dish_id})
+    try:
+        tasks_collection.insert_one(task)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Error al guardar la tarea en MongoDB: {exc}",
+        ) from exc
+    try:
+        publish_dish_task(taskId, {"action": "delete", "dish_id": dish_id})
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     return {"taskId": taskId, "status": "running"}
 
 """

@@ -4,15 +4,7 @@ import pika
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
-from api.get_parameter import get_mongodb_ip, get_rabbitmq_ip
-
-#Conexión a mongo con el ps
-def get_mongo_uri() -> str:
-    # Obtiene la IP de MongoDB desde Parameter Store, si SSM no está disponible, usa variable default
-    mongo_ip = get_mongodb_ip()
-    if mongo_ip == "localhost":
-        return os.getenv("MONGO_URI", "mongodb://admin:admin123@localhost:27017/")
-    return f"mongodb://admin:password123@{mongo_ip}:27017/?authSource=admin"
+from api.get_parameter import get_mongo_uri, get_rabbitmq_ip
 
 MONGO_URI = get_mongo_uri()
 client = MongoClient(MONGO_URI)
@@ -78,8 +70,8 @@ def main():
     if host == "localhost":
         host = os.getenv("RABBITMQ_HOST", "localhost")
     port = int(os.getenv("RABBITMQ_PORT", "5672"))
-    user = os.getenv("RABBITMQ_USER", "user")
-    password = os.getenv("RABBITMQ_PASSWORD", "password")
+    user = os.getenv("RABBITMQ_USER", "admin")
+    password = os.getenv("RABBITMQ_PASSWORD", "password123")
 
     credentials = pika.PlainCredentials(user, password)
     params = pika.ConnectionParameters(host=host, port=port, credentials=credentials)

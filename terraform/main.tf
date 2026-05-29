@@ -29,11 +29,18 @@
 #
 # =============================================================================
 
-locals {                                                           # Define valores locales reutilizables dentro del módulo (fuente: Terraform locals)
-  api_user_data = templatefile("${path.module}/install_api.tpl", { # Renderiza plantilla user_data inyectando variables dinámicas (fuente: Terraform templatefile)
-    rabbit_private_ip = aws_instance.rabbitmq.private_ip           # Inserta IP privada de instancia RabbitMQ (fuente: aws_instance.private_ip)
-    mongo_private_ip  = aws_instance.mongodb.private_ip            # Inserta IP privada de instancia MongoDB (fuente: aws_instance.private_ip)
-    git_repo_url      = var.git_repo_url                           # Inserta URL de repositorio parametrizable (fuente: Terraform variable interpolation)
+locals {
+  mongo_connection_uri = "mongodb://admin:password123@${aws_instance.mongodb.private_ip}:27017/?authSource=admin"
+  api_user_data = templatefile("${path.module}/install_api.tpl", {
+    rabbit_private_ip = aws_instance.rabbitmq.private_ip
+    mongo_private_ip  = aws_instance.mongodb.private_ip
+    mongo_uri         = local.mongo_connection_uri
+    git_repo_url      = var.git_repo_url
+  })
+  worker_user_data = templatefile("${path.module}/install_worker.tpl", {
+    rabbit_private_ip = aws_instance.rabbitmq.private_ip
+    mongo_uri         = local.mongo_connection_uri
+    git_repo_url      = var.git_repo_url
   })
 }
 
@@ -64,7 +71,7 @@ resource "aws_instance" "worker" {                                       # Crea 
   key_name                    = var.key_name                             # Clave SSH para administración manual (fuente: AWS EC2)
   subnet_id                   = var.subnets[0]                           # Se despliega en subnet principal definida (fuente: arquitectura actual)
   vpc_security_group_ids      = [aws_security_group.worker_sg.id]        # Aplica reglas de red del worker (fuente: SG separation of concerns)
-  user_data                   = file("${path.module}/install_worker.sh") # Provisiona dependencias y ejecuta worker al iniciar (fuente: EC2 user_data)
+  user_data                   = local.worker_user_data
   associate_public_ip_address = true                                     # Habilita IP pública para soporte/labs (fuente: configuración actual del proyecto)
 
   tags = {                         # Etiquetas para identificar la instancia worker (fuente: AWS tags)
@@ -246,4 +253,25 @@ resource "aws_ssm_parameter" "mongodb_ip" {                        # Registra IP
   type        = "String"                                           # Tipo string para valor IP (fuente: AWS parameter type system)
   value       = aws_instance.mongodb.public_ip                     # Obtiene IP pública calculada por AWS (fuente: aws_instance.public_ip)
   description = "IP publica del servidor MongoDB (restaurant-api)" # Explica contenido para usuario operador (fuente: convención del proyecto)
+}
+
+resource "aws_ssm_parameter" "mongodb_private_ip" {
+  name        = "${var.ssm_parameter_prefix}/mongodb/private_ip"
+  type        = "String"
+  value       = aws_instance.mongodb.private_ip
+  description = "IP privada de MongoDB para API/Worker en la VPC"
+}
+
+resource "aws_ssm_parameter" "mongodb_connection_uri" {
+  name        = "${var.ssm_parameter_prefix}/mongodb/connection_uri"
+  type        = "String"
+  value       = local.mongo_connection_uri
+  description = "URI de conexion MongoDB (IP privada); usar como MONGO_URI"
+}
+
+resource "aws_ssm_parameter" "rabbitmq_private_ip" {
+  name        = "${var.ssm_parameter_prefix}/rabbitmq/private_ip"
+  type        = "String"
+  value       = aws_instance.rabbitmq.private_ip
+  description = "IP privada de RabbitMQ para API/Worker en la VPC"
 }

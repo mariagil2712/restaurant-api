@@ -29,3 +29,9 @@ output "mongodb_public_ip" {                      # Entrega IP pública de Mongo
   value       = aws_instance.mongodb.public_ip    # Referencia atributo public_ip de la EC2 MongoDB (fuente: aws_instance attributes)
   description = "IP publica del servidor MongoDB" # Texto descriptivo para uso post-deploy (fuente: convención del proyecto)
 }
+
+output "mongodb_connection_uri" {
+  value       = local.mongo_connection_uri
+  description = "URI de MongoDB (IP privada). Usar como MONGO_URI en API/Worker."
+  sensitive   = true
+}

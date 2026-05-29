@@ -21,7 +21,8 @@ sudo usermod -aG docker ec2-user || true # Agrega ec2-user al grupo docker y evi
 # Sustituir manualmente si ejecutas este script fuera de Terraform:
 GIT_REPO_URL="${GIT_REPO_URL:-https://github.com/mariagil2712/restaurant-api.git}" # Usa variable externa o URL por defecto del repo (fuente: expansión de parámetros Bash)
 RABBIT_IP="${RABBIT_IP:-localhost}" # Define host de RabbitMQ con fallback local (fuente: expansión de parámetros Bash)
-MONGO_IP="${MONGO_IP:-localhost}" # Define host de MongoDB con fallback local (fuente: expansión de parámetros Bash)
+MONGO_IP="${MONGO_IP:-localhost}"
+MONGO_URI="${MONGO_URI:-mongodb://admin:password123@${MONGO_IP}:27017/?authSource=admin}"
 
 cd /home/ec2-user # Trabaja en home del usuario estándar de EC2 (fuente: convención Amazon Linux)
 rm -rf restaurant-api # Elimina clon previo para despliegue idempotente (fuente: práctica de bootstrap)
@@ -31,4 +32,10 @@ cd restaurant-api # Entra al código fuente para construir imagen (fuente: estru
 sudo docker build -t restaurant-api:latest . # Construye imagen local de la API con tag latest (fuente: Docker build docs)
 
 sudo docker rm -f restaurant-api 2>/dev/null || true # Remueve contenedor previo si existe, sin detener el script en error (fuente: Docker rm + Bash tolerante)
-sudo docker run -d --name restaurant-api --restart unless-stopped -p 8000:8000 -e "RABBITMQ_HOST=$RABBIT_IP" -e "RABBITMQ_PORT=5672" -e "RABBITMQ_USER=admin" -e "RABBITMQ_PASSWORD=password123" -e "MONGO_URI=mongodb://admin:password123@${MONGO_IP}:27017/?authSource=admin" restaurant-api:latest # Inicia API publicando :8000 y pasando variables de conexión a Rabbit/Mongo (fuente: Docker run + variables de la app)
+sudo docker run -d --name restaurant-api --restart unless-stopped -p 8000:8000 \
+  -e "RABBITMQ_HOST=$RABBIT_IP" \
+  -e "RABBITMQ_PORT=5672" \
+  -e "RABBITMQ_USER=admin" \
+  -e "RABBITMQ_PASSWORD=password123" \
+  -e "MONGO_URI=$MONGO_URI" \
+  restaurant-api:latest
