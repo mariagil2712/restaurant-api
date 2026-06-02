@@ -4,7 +4,7 @@
 variable "vpc_id" {                     # Define variable de entrada para identificar la VPC de despliegue (fuente: Terraform Input Variables)
   type        = string                  # Restringe el tipo a texto (fuente: sistema de tipos HCL)
   description = "ID de la VPC"          # Documenta el propósito de la variable (fuente: convención Terraform)
-  default     = "vpc-058e0cd8cb5cde2a1" # Valor por defecto del laboratorio/proyecto (fuente: configuración actual AWS)
+  default     = "vpc-06ebbb32c80110dd7" # Valor por defecto del laboratorio/proyecto (fuente: configuración actual AWS)
 }
 
 # AMI Amazon Linux 2023 (x86_64) en la región de despliegue.
@@ -32,9 +32,9 @@ variable "subnets" {                                                         # L
   type        = list(string)                                                 # Lista de IDs en texto (fuente: tipos compuestos HCL)
   description = "Lista de subnet IDs (mínimo 2 en AZ distintas para el ALB)" # Requisito del ALB multi-AZ (fuente: AWS ALB docs)
   default = [
-    "subnet-060ddd0dac60e2f5d", # Subnet en us-east-1a (fuente: inventario VPC actual)
-    "subnet-0c5c5ff530c2f5b1a", # Subnet en us-east-1b (fuente: inventario VPC actual)
-    "subnet-0662c505bccb76eb8", # Subnet en us-east-1c (fuente: inventario VPC actual)
+    "subnet-019a440f2b505525e", # Subnet en us-east-1a (fuente: inventario VPC actual)
+    "subnet-046f51fe97f976000", # Subnet en us-east-1b (fuente: inventario VPC actual)
+    "subnet-0244009bbeb4a9705", # Subnet en us-east-1c (fuente: inventario VPC actual)
   ]
 }
 
